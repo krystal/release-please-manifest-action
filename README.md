@@ -1,24 +1,29 @@
 <h1 align="center">
-  release-please-action
+  release-please-manifest-action
 </h1>
 
-Composite [GitHub Action][1] which wraps [release-please-action][2] and
-[github-app-token][3] actions, with some opinionated default settings.
+Opinionated [action][1] for running [release-please][2] in [manifest mode][3]
+with support for authenticating as a [GitHub App][4].
+
+Implemented as a composite action which wraps [release-please-action][5] and
+[github-app-token][6] actions, with opinionated default settings.
 
 [1]: https://github.com/features/actions
-[2]: https://github.com/google-github-actions/release-please-action
-[3]: https://github.com/tibdex/github-app-token
+[2]: https://github.com/googleapis/release-please
+[3]:
+  https://github.com/googleapis/release-please/blob/main/docs/manifest-releaser.md
+[4]: https://docs.github.com/en/apps/overview
+[5]: https://github.com/google-github-actions/release-please-action
+[6]: https://github.com/tibdex/github-app-token
 
 ## Features
 
 - Makes it easy to run release-please as a GitHub App, allowing checks to run on
   Release Pull Requests.
-- Defaults to placing release-please config and manifest within the `.github`
-  folder in the repository root:
-  - `.github/release-please-manifest.json` instead of
-    `.release-please-manifest.json`.
-  - `.github/release-please-config.json` instead of
-    `release-please-config.json`.
+- Defaults to placing release-please config and manifest files within the
+  `.github` folder instead of in the repository root:
+  - `.github/release-please-manifest.json`
+  - `.github/release-please-config.json`
 
 ## To-Do
 
@@ -45,7 +50,6 @@ jobs:
         with:
           app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
           private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
-          command: manifest
 ```
 
 The above, is equivalent to:

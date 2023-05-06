@@ -1,251 +1,117 @@
 ---
 name: "release-please-action"
-description: "automated releases based on conventional commits"
-author: "@jimeh"
+description: >-
+  Opinionated action for running release-please in manifest mode with optional
+  support to authenticate as a GitHub App.
+author: "jimeh"
 
 inputs:
-  #
-  # github-app-token inputs
-  #
-  app-id:
-    description: ID of the GitHub App to use for authentication. If not provided authentication falls back to secrets.GITHUB_TOKEN.
-    required: false
-  installation-id:
-    description: The ID of the installation for which the token will be requested (defaults to the ID of the repository's installation).
-  permissions:
-    description: The JSON-stringified permissions granted to the token (defaults to all the GitHub app permissions, see https://docs.github.com/en/rest/apps/apps#create-an-installation-access-token-for-an-app).
-  private-key:
-    description: Private key of the GitHub App (can be Base64 encoded). Required when app-id is provided.
-    required: false
-  repository:
-    description: The full name of the repository for which the token will be requested.
-    default: ${{ github.repository }}
-
-  #
-  # release-please inputs
-  #
   token:
-    description: "GitHub token for creating and grooming release PRs, defaults to using secrets.GITHUB_TOKEN"
+    description: >-
+      GitHub token used to authenticate.
     required: false
     default: ${{ github.token }}
-  fork:
-    description: "should the PR be proposed from a fork, Default to false"
+  app-id:
+    description: >-
+      ID of the GitHub App to use for authentication. If set, takes precedence
+      over token input.
     required: false
-    default: false
-  clean:
-    description: "Should stale release PRs be closed post release? Defaults to true"
+  private-key:
+    description: >-
+      Private key of the GitHub App (can be Base64 encoded). Required when
+      app-id is provided.
     required: false
-    default: true
-  package-name:
-    description: 'name of the distributions releases are being created for, e.g., "name" in package.json, or "setup.py"'
+  installation-id:
+    description: >-
+      ID of the installation for which the app token will be requested. Defaults
+      to the ID of the repository's installation.
+  permissions:
+    description: >-
+      JSON-stringified permissions granted to the app token. Defaults to all the
+      GitHub app permissions, see:
+      https://docs.github.com/en/rest/apps/apps#create-an-installation-access-token-for-an-app
+  github-api-url:
+    description: Configure github API URL.
     required: false
-  release-type:
-    description: "what type of release is this, one of (ruby, python, node, terraform-module)"
-    required: false
-  bump-minor-pre-major:
-    description: "should breaking changes before 1.0.0 produce minor bumps"
-    required: false
-    default: false
-  bump-patch-for-minor-pre-major:
-    description: "should feat changes before 1.0.0 produce patch bumps instead of minor bumps"
-    required: false
-    default: false
-  path:
-    description: "create a release from a path other than the repository's root"
-    required: false
-    default: ""
-  changelog-path:
-    description: "specify a CHANGELOG path other than the root CHANGELOG.md"
-    required: false
-    default: ""
-  changelog-host:
-    description: "The proto://host where commits live."
-    required: false
-    default: ${{ github.server_url }}
-  command:
-    description: 'release-please command to run, either "github-release", or "release-pr" (defaults to running both)'
-    required: false
-    default: ""
-  version-file:
-    description: "provide a path to a version file to increment (used by ruby releaser)"
-    required: false
-    default: ""
-  extra-files:
-    description: "extra files to bump using the generic updater"
-    required: false
-    default: ""
+    default: ${{ github.api_url }}
+  repository:
+    description: >-
+      The full name of the repository to operate on in owner/repo format.
+      Defaults to the current repository.
+    default: ${{ github.repository }}
   default-branch:
-    description: "branch to open pull release PR against (detected by default)"
-    required: false
-    default: ""
-  changelog-types:
-    description: "changlelog commit types"
+    description: >-
+      Branch to open pull release PR against. Defaults to the repository's
+      default branch.
     required: false
     default: ""
   config-file:
-    description: "where can the config file be found in the project?"
+    description: Pat to config file within the project.
     required: false
-    # Changed from upstream detault value of "".
     default: ".github/release-please-config.json"
   manifest-file:
-    description: "where can the manifest file be found in the project?"
+    description: Path to manifest file within the project.
     required: false
-    # Changed from upstream detault value of "".
     default: ".github/release-please-manifest.json"
-  signoff:
-    description: 'Add [`Signed-off-by`](https://git-scm.com/docs/git-commit#Documentation/git-commit.txt---signoff) line at the end of the commit log message using the user and email provided. (format "Name \<email@example.com\>")'
-    required: false
-    default: ""
-  github-api-url:
-    description: "configure github API URL. Default `https://api.github.com`"
-    required: false
-    default: ${{ github.api_url }}
-  github-graphql-url:
-    description: "configure github GraphQL URL. Default `https://api.github.com`"
-    required: false
-    default: ${{ github.graphql_url }}
-  repo-url:
-    description: "configure github repository URL. Default `process.env.GITHUB_REPOSITORY`"
-    required: false
-    default: ""
-  monorepo-tags:
-    description: "add prefix to tags and branches, allowing multiple libraries to be released from the same repository"
-    required: false
-    default: false
-  pull-request-title-pattern:
-    description: 'add title pattern to make release PR, defaults to using "chore${scope}: release${component} ${version}"'
-    required: false
-  pull-request-header:
-    description: 'set release PR header, defaults to using ":robot: I have created a release *beep* *boop*"'
-    required: false
-  draft:
-    description: "mark release as a draft"
-    required: false
-  draft-pull-request:
-    description: "mark pull request as a draft"
-    required: false
-  changelog-notes-type:
-    description: "Strategy for building the changelog contents(see https://github.com/googleapis/release-please/blob/main/docs/customizing.md#changelog-types). Default `default`. Called `changelog-type` in release-please documentation."
-    required: false
-  versioning-strategy:
-    description: "Override method of determining SemVer version bumps based on commits (drr https://github.com/googleapis/release-please/blob/main/docs/customizing.md#versioning-strategies). Default `default`"
-    required: false
-  release-as:
-    description: "manually set version to this value, ignoring conventional commits. Absence defaults to conventional commits derived next version. Once the release PR is merged you should either remove this or update it to a higher version. Otherwise subsequent `manifest-pr` runs will continue to use this version even though it was already set in the last release."
-    required: false
-  skip-github-release:
-    description: "Skip creating GitHub Releases. Default `false`"
-    required: false
-  prerelease:
-    description: "If set, create releases that are pre-major or pre-release version marked as pre-release on Github. Defaults `false`"
-    required: false
-  component:
-    description: "name of the component used for branch naming and release tagging, defaults to a normalized version based on the package name"
-    required: false
-  include-v-in-tag:
-    description: 'include "v" in tag versions. Default `true`'
-    required: false
-  tag-separator:
-    description: "configures separator character used in release tag"
-    required: false
-  snapshot-labels:
-    description: "sets java snapshot pull request labels other than `autorelease: snapshot`  "
-    required: false
-  bootstrap-sha:
-    description: "if this is the first time running `manifest-pr` on a repo this key will limit how far back (exclusive) to pull commits for conventional commit parsing (see the manifest releaser docs https://github.com/googleapis/release-please/blob/main/docs/manifest-releaser.md)"
-    required: false
-  last-release-sha:
-    description: "overrides the commit sha release-please will use from which to gather commits for the current release (see the manifest releaser docs https://github.com/googleapis/release-please/blob/main/docs/manifest-releaser.md)"
-    required: false
-  always-link-local:
-    description: "when using the `node-workspace` plugin, setting to false will only bump your local dependencies within the SemVer range (see the manifest releaser docs)[https://github.com/googleapis/release-please/blob/main/docs/manifest-releaser.md) . Default `true`."
-    required: false
-  separate-pull-requests:
-    description: "create separate pull requests for each package instead of a single manifest release pull request (see the manifest releaser docs https://github.com/googleapis/release-please/blob/main/docs/manifest-releaser.md). Default `false`."
-    required: false
-  plugins:
-    description: "see https://github.com/googleapis/release-please/blob/main/docs/manifest-releaser.md#plugins"
-    required: false
-  labels:
-    description: "list of labels to apply to the release pull requests, defaults to `autorelease: pending`"
-    required: false
-  release-labels:
-    description: "set a pull request label other than `autorelease: tagged`"
-    required: false
-  skip-labeling:
-    description: "if set, labels will not be applied to pull requests. Default `false`."
-    required: false
-  sequential-calls:
-    description: "issue GitHub API requests sequentially rather than concurrently (see the manifest releaser docs https://github.com/googleapis/release-please/blob/main/docs/manifest-releaser.md). Default `false`"
-    required: false
-  group-pull-request-title-pattern:
-    description: "sets the manifest pull request title for when releasing multiple packages grouped together in the one pull request"
-    required: false
-  release-search-depth:
-    description: "when searching for the latest release SHAs, only consider the last N releases"
-    required: false
-  commit-search-depth:
-    description: "when fetching the list of commits to consider, only consider the last N commits"
-    required: false
-  proxy-server:
-    description: "set proxy sever when you run this action behind a proxy. format is host:port e.g. proxy-host.com:8080"
-    required: false
 
 outputs:
   release_created:
-    description: "whether or not a release was created"
+    description: "Whether or not a release was created."
     value: ${{ steps.release-please.outputs.release_created }}
   releases_created:
-    description: "whether or not a release was created"
+    description: "Whether or not a release was created."
     value: ${{ steps.release-please.outputs.releases_created }}
   id:
-    description: "release id"
+    description: "Release ID."
     value: ${{ steps.release-please.outputs.id }}
   name:
-    description: "release name"
+    description: "Release name."
     value: ${{ steps.release-please.outputs.name }}
   tag_name:
-    description: "release tag name"
+    description: "Release tag name."
     value: ${{ steps.release-please.outputs.tag_name }}
   sha:
-    description: "release sha"
+    description: "Release sha"
     value: ${{ steps.release-please.outputs.sha }}
   body:
-    description: "release body"
+    description: "Release body."
     value: ${{ steps.release-please.outputs.body }}
   html_url:
-    description: "release url"
+    description: "Release URL."
     value: ${{ steps.release-please.outputs.html_url }}
   draft:
-    description: "whether or not the release is a draft"
+    description: "Whether or not the release is a draft."
     value: ${{ steps.release-please.outputs.draft }}
   upload_url:
-    description: "release upload url"
+    description: "Release upload URL."
     value: ${{ steps.release-please.outputs.upload_url }}
   path:
-    description: "path that was released"
+    description: "Path that was released."
     value: ${{ steps.release-please.outputs.path }}
   version:
-    description: "version that was released"
+    description: "Version that was released."
     value: ${{ steps.release-please.outputs.version }}
   major:
-    description: "major version that was released"
+    description: "Major version that was released."
     value: ${{ steps.release-please.outputs.major }}
   minor:
-    description: "minor version that was released"
+    description: "Minor version that was released."
     value: ${{ steps.release-please.outputs.minor }}
   patch:
-    description: "patch version that was released"
+    description: "Patch version that was released."
     value: ${{ steps.release-please.outputs.patch }}
   paths_released:
-    description: "paths that were released"
+    description: "Paths that were released."
     value: ${{ steps.release-please.outputs.paths_released }}
   pr:
-    description: "pull request number"
+    description: "Pull request number."
     value: ${{ steps.release-please.outputs.pr }}
   prs:
-    description: "pull request numbers"
+    description: "Pull request numbers."
     value: ${{ steps.release-please.outputs.prs }}
+  release-please:
+    description: "All outputs from release-please action as a JSON string."
+    value: ${{ toJSON(steps.release-please.outputs) }}
 
 runs:
   using: "composite"
@@ -260,7 +126,8 @@ runs:
         permissions: ${{ inputs.permissions }}
         private_key: ${{ inputs.private-key }}
         repository: ${{ github.repository }}
-    - id: token
+    - name: Determine which token to use
+      id: token
       run: |-
         echo "token=${APP_TOKEN:-$INPUT_TOKEN}" >> "$GITHUB_OUTPUT"
       env:
@@ -270,51 +137,11 @@ runs:
     - uses: google-github-actions/release-please-action@v3
       id: release-please
       with:
+        command: manifest
         token: ${{ steps.token.outputs.token }}
-        fork: ${{ inputs.fork }}
-        clean: ${{ inputs.clean }}
-        package-name: ${{ inputs.package-name }}
-        release-type: ${{ inputs.release-type }}
-        bump-minor-pre-major: ${{ inputs.bump-minor-pre-major }}
-        bump-patch-for-minor-pre-major: ${{ inputs.bump-patch-for-minor-pre-major }}
-        path: ${{ inputs.path }}
-        changelog-path: ${{ inputs.changelog-path }}
-        changelog-host: ${{ inputs.changelog-host }}
-        command: ${{ inputs.command }}
-        version-file: ${{ inputs.version-file }}
-        extra-files: ${{ inputs.extra-files }}
         default-branch: ${{ inputs.default-branch }}
-        changelog-types: ${{ inputs.changelog-types }}
         config-file: ${{ inputs.config-file }}
         manifest-file: ${{ inputs.manifest-file }}
-        signoff: ${{ inputs.signoff }}
         github-api-url: ${{ inputs.github-api-url }}
-        github-graphql-url: ${{ inputs.github-graphql-url }}
-        repo-url: ${{ inputs.repo-url }}
-        monorepo-tags: ${{ inputs.monorepo-tags }}
-        pull-request-title-pattern: ${{ inputs.pull-request-title-pattern }}
-        pull-request-header: ${{ inputs.pull-request-header }}
-        draft: ${{ inputs.draft }}
-        draft-pull-request: ${{ inputs.draft-pull-request }}
-        changelog-notes-type: ${{ inputs.changelog-notes-type }}
-        versioning-strategy: ${{ inputs.versioning-strategy }}
-        release-as: ${{ inputs.release-as }}
-        skip-github-release: ${{ inputs.skip-github-release }}
-        prerelease: ${{ inputs.prerelease }}
-        component: ${{ inputs.component }}
-        include-v-in-tag: ${{ inputs.include-v-in-tag }}
-        tag-separator: ${{ inputs.tag-separator }}
-        snapshot-labels: ${{ inputs.snapshot-labels }}
-        bootstrap-sha: ${{ inputs.bootstrap-sha }}
-        last-release-sha: ${{ inputs.last-release-sha }}
-        always-link-local: ${{ inputs.always-link-local }}
-        separate-pull-requests: ${{ inputs.separate-pull-requests }}
-        plugins: ${{ inputs.plugins }}
-        labels: ${{ inputs.labels }}
-        release-labels: ${{ inputs.release-labels }}
-        skip-labeling: ${{ inputs.skip-labeling }}
-        sequential-calls: ${{ inputs.sequential-calls }}
-        group-pull-request-title-pattern: ${{ inputs.group-pull-request-title-pattern }}
-        release-search-depth: ${{ inputs.release-search-depth }}
-        commit-search-depth: ${{ inputs.commit-search-depth }}
-        proxy-server: ${{ inputs.proxy-server }}
+        github-graphql-url: ${{ inputs.github-api-url }}
+        repo-url: ${{ inputs.repository }}
