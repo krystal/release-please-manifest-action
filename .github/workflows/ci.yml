@@ -8,6 +8,34 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: jimeh/release-please-manifest-action@main
+        id: release
         with:
           app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
           private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+      - uses: actions/checkout@v3
+        if: ${{ steps.release.outputs.release_created }}
+      - name: Get GitHub App token
+        if: ${{ steps.release.outputs.release_created }}
+        uses: tibdex/github-app-token@v1
+        id: github-app-token
+        with:
+          app_id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private_key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+      - name: Tag major and minor versions
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          git config user.name 'jimehbot[bot]'
+          git config user.email '132453784+jimehbot[bot]@users.noreply.github.com'
+          git remote add gh-token "https://${APP_TOKEN}@github.com/${{ github.repository }}.git"
+          git tag -d "$MAJOR_TAG" || true
+          git tag -d "$MINOR_TAG" || true
+          git push origin ":${MAJOR_TAG}" || true
+          git push origin ":${MINOR_TAG}" || true
+          git tag -a "$MAJOR_TAG" -m "Release ${MAJOR_TAG}"
+          git tag -a "$MINOR_TAG" -m "Release ${MINOR_TAG}"
+          git push origin "$MAJOR_TAG"
+          git push origin "$MINOR_TAG"
+        env:
+          APP_TOKEN: ${{ steps.github-app-token.outputs.token }}
+          MAJOR_TAG: v${{ steps.release.outputs.major }}
+          MINOR_TAG: v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}
