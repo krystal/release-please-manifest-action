@@ -18,7 +18,7 @@ jobs:
         if: ${{ steps.release.outputs.release_created }}
         uses: richardsimko/update-tag@v1
         with:
-          tag_name: v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}
+          tag_name: v${{ steps.release.outputs.major }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create/update MAJOR.MINOR tag
