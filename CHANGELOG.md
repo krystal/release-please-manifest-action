@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.4](https://github.com/jimeh/release-please-manifest-action/compare/v0.0.3...v0.0.4) (2023-05-07)
+
+
+### Bug Fixes
+
+* **release:** attempt to sign major and minor tags ([77312c1](https://github.com/jimeh/release-please-manifest-action/commit/77312c11a926651d7f66d4fed3dcd5d0b50727ae))
+
 ## [0.0.3](https://github.com/jimeh/release-please-manifest-action/compare/v0.0.2...v0.0.3) (2023-05-07)
 
 
