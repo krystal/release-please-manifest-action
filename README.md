@@ -66,7 +66,10 @@ on: push
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: jimeh/release-please-manifest-action@v0
 ```
@@ -81,7 +84,10 @@ on: push
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: google-github-actions/release-please-action@v3
         id: release-please
@@ -112,7 +118,10 @@ on: push
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: jimeh/release-please-manifest-action@v0
         with:
@@ -129,7 +138,10 @@ on: push
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: google-github-actions/release-please-action@v3
         id: release-please
@@ -162,7 +174,7 @@ Below we assume you have already setup `RELEASE_BOT_APP_ID` and
 `RELEASE_BOT_PRIVATE_KEY` secrets in the repository or organization.
 
 To set the private key secret, it is easiest to base64 encode the contents of
-`*.pem` file you get from the GitHub App's configuration page. The base64
+the `*.pem` file you get from the GitHub App's configuration page. The base64
 encoded string should not have any line-breaks.
 
 <!-- x-release-please-start-major -->
@@ -172,7 +184,7 @@ on: push
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: jimeh/release-please-manifest-action@v0
         with:
@@ -190,7 +202,7 @@ on: push
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: tibdex/github-app-token@v1
         id: github-app-token
