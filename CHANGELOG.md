@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.3](https://github.com/jimeh/release-please-manifest-action/compare/v0.0.2...v0.0.3) (2023-05-07)
+
+
+### Bug Fixes
+
+* **release:** use full version in tag annotations ([08e227b](https://github.com/jimeh/release-please-manifest-action/commit/08e227b3057a732f0947407b8657123e5418e77c))
+
 ## [0.0.2](https://github.com/jimeh/release-please-manifest-action/compare/v0.0.1...v0.0.2) (2023-05-07)
 
 
