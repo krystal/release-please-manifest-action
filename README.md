@@ -2,42 +2,64 @@
   release-please-manifest-action
 </h1>
 
-Opinionated [action][1] for running [release-please][2] in [manifest mode][3]
-with support for authenticating as a [GitHub App][4].
+<p align="center">
+  <strong>
+    Opinionated action for running release-please in manifest mode.
+  </strong>
+</p>
 
-Implemented as a composite action which wraps [release-please-action][5] and
-[github-app-token][6] actions, with opinionated default settings.
+<p align="center">
+  <a href="https://github.com/jimeh/release-please-manifest-action/releases">
+    <img src="https://img.shields.io/github/v/tag/jimeh/release-please-manifest-action?label=release" alt="GitHub tag (latest SemVer)">
+  </a>
+  <a href="https://github.com/jimeh/release-please-manifest-action/issues">
+    <img src="https://img.shields.io/github/issues-raw/jimeh/release-please-manifest-action.svg?style=flat&logo=github&logoColor=white" alt="GitHub issues">
+  </a>
+  <a href="https://github.com/jimeh/release-please-manifest-action/pulls">
+    <img src="https://img.shields.io/github/issues-pr-raw/jimeh/release-please-manifest-action.svg?style=flat&logo=github&logoColor=white" alt="GitHub pull requests">
+  </a>
+  <a href="https://github.com/jimeh/release-please-manifest-action/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/jimeh/release-please-manifest-action.svg?style=flat" alt="License Status">
+  </a>
+</p>
 
-[1]: https://github.com/features/actions
-[2]: https://github.com/googleapis/release-please
-[3]:
+A composite action which wraps [release-please-action][] and
+[github-app-token][] actions, with opinionated default settings focused on
+running [release-please][] in [manifest mode][].
+
+[release-please-action]:
+  https://github.com/google-github-actions/release-please-action
+[github-app-token]: https://github.com/tibdex/github-app-token
+[release-please]: https://github.com/googleapis/release-please
+[manifest mode]:
   https://github.com/googleapis/release-please/blob/main/docs/manifest-releaser.md
-[4]: https://docs.github.com/en/apps/overview
-[5]: https://github.com/google-github-actions/release-please-action
-[6]: https://github.com/tibdex/github-app-token
 
-## Features
+# Features
 
-- Makes it easy to run release-please as a GitHub App, allowing checks to run on
-  Release Pull Requests.
-- Defaults to placing release-please config and manifest files within the
-  `.github` folder instead of in the repository root:
+- Focuses on and only supports running release-please's manifest command.
+- Optionally supports having release-please authenticate as a GitHub App.
+- By default places release-please config and manifest files within the
+  top-level `.github` directory instead of in the repository root:
   - `.github/release-please-manifest.json`
   - `.github/release-please-config.json`
 
-## To-Do
+# Examples
 
-- [ ] Verify stability of this action.
-- [ ] Setup CI releases using itself, so the action can be referred to with
-      `@v1` instead of `@main`.
+## Basic (Actions Token)
 
-## Examples
+This example will have release-please authenticate using `secrets.GITHUB_TOKEN`
+that is automatically available to all actions.
 
-The below example assumes you have secrets already setup for the app ID and
-private key.
+This will prevent checks / GitHub Actions running against any Release Pull
+Requests raised by release-please. This is a feature of GitHub as a means of
+trying to avoid GitHub Actions jobs triggering themselves, causing an endless
+loop.
 
-If you do not want to authenticate as a GitHub App, simply do not provide
-`app-id` and `private-key` inputs.
+If you need checks to run against Release Pull Requests, you will need to have
+release-please authenticate with a Personal Access Token (PAT), or as a GitHub
+App.
+
+<!-- x-release-please-start-major -->
 
 ```yaml
 on: push
@@ -46,13 +68,122 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     steps:
-      - uses: jimeh/release-please-action@main
+      - uses: jimeh/release-please-action@v0
+```
+
+<!-- x-release-please-end -->
+
+<details>
+<summary>The above is equivalent to:</summary>
+
+```yaml
+on: push
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release-please
+        with:
+          command: manifest
+          config-file: .github/release-please-config.json
+          manifest-file: .github/release-please-manifest.json
+```
+
+_Note: Outputs are not included in this equivalence example._
+
+</details>
+
+## Personal Access Token (PAT) Authentication
+
+This example will have release-please authenticate with a user's Personal Access
+Token (PAT), performing all operations on behalf of that user. Allowing checks /
+GitHub Actions to run against Release Pull Requests.
+
+It is common to have a dedicated "bot" user created for these purposes. But
+within paid organizations, that means an extra user seat needs to be paid for.
+In that case you might prefer using a GitHub App instead.
+
+<!-- x-release-please-start-major -->
+
+```yaml
+on: push
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - uses: jimeh/release-please-action@v0
+        with:
+          token: ${{ secrets.RELEASE_PAT_TOKEN }}
+```
+
+<!-- x-release-please-end -->
+
+<details>
+<summary>The above is equivalent to:</summary>
+
+```yaml
+on: push
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release-please
+        with:
+          token: ${{ secrets.RELEASE_PAT_TOKEN }}
+          command: manifest
+          config-file: .github/release-please-config.json
+          manifest-file: .github/release-please-manifest.json
+```
+
+_Note: Outputs are not included in this equivalence example._
+
+</details>
+
+## GitHub App Authentication
+
+This example will have release-please authenticate as a GitHub App, performing
+all operations on behalf of the app.
+
+This has a few benefits compared to using the token provided by GitHub Actions
+or a user's personal access token:
+
+- It allows checks / GitHub Actions to run against the Release Pull Requests
+  raised by release-please.
+- An app can be given permissions to access all repos within an organization.
+- Compared to creating a separate "bot" user, paid organizations do not need to
+  pay for an extra user seat when using an app.
+
+Below we assume you have already setup `RELEASE_BOT_APP_ID` and
+`RELEASE_BOT_PRIVATE_KEY` secrets in the repository or organization.
+
+To set the private key secret, it is easiest to base64 encode the contents of
+`*.pem` file you get from the GitHub App's configuration page. The base64
+encoded string should not have any line-breaks.
+
+<!-- x-release-please-start-major -->
+
+```yaml
+on: push
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - uses: jimeh/release-please-action@v0
         with:
           app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
           private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
 ```
 
-The above, is equivalent to:
+<!-- x-release-please-end -->
+
+<details>
+<summary>The above is equivalent to:</summary>
 
 ```yaml
 on: push
@@ -74,3 +205,60 @@ jobs:
           config-file: .github/release-please-config.json
           manifest-file: .github/release-please-manifest.json
 ```
+
+_Note: Outputs are not included in this equivalence example._
+
+</details>
+
+# Reference
+
+<!-- action-docs-inputs -->
+
+## Inputs
+
+| parameter       | description                                                                                                                                                                                      | required | default                              |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------------------------ |
+| token           | GitHub token used to authenticate.                                                                                                                                                               | `false`  | ${{ github.token }}                  |
+| app-id          | ID of the GitHub App to use for authentication. If set, takes precedence over token input.                                                                                                       | `false`  |                                      |
+| private-key     | Private key of the GitHub App (can be Base64 encoded). Required when app-id is provided.                                                                                                         | `false`  |                                      |
+| installation-id | ID of the installation for which the app token will be requested. Defaults to the ID of the repository's installation.                                                                           | `false`  |                                      |
+| permissions     | JSON-stringified permissions granted to the app token. Defaults to all the GitHub app permissions, see: https://docs.github.com/en/rest/apps/apps#create-an-installation-access-token-for-an-app | `false`  |                                      |
+| github-api-url  | Configure github API URL.                                                                                                                                                                        | `false`  | ${{ github.api_url }}                |
+| repository      | The full name of the repository to operate on in owner/repo format. Defaults to the current repository.                                                                                          | `false`  | ${{ github.repository }}             |
+| default-branch  | Branch to open pull release PR against. Defaults to the repository's default branch.                                                                                                             | `false`  |                                      |
+| config-file     | Pat to config file within the project.                                                                                                                                                           | `false`  | .github/release-please-config.json   |
+| manifest-file   | Path to manifest file within the project.                                                                                                                                                        | `false`  | .github/release-please-manifest.json |
+
+<!-- action-docs-inputs -->
+
+<!-- action-docs-outputs -->
+
+## Outputs
+
+| parameter        | description                                              |
+| ---------------- | -------------------------------------------------------- |
+| release_created  | Whether or not a release was created.                    |
+| releases_created | Whether or not a release was created.                    |
+| id               | Release ID.                                              |
+| name             | Release name.                                            |
+| tag_name         | Release tag name.                                        |
+| sha              | Release sha                                              |
+| body             | Release body.                                            |
+| html_url         | Release URL.                                             |
+| draft            | Whether or not the release is a draft.                   |
+| upload_url       | Release upload URL.                                      |
+| path             | Path that was released.                                  |
+| version          | Version that was released.                               |
+| major            | Major version that was released.                         |
+| minor            | Minor version that was released.                         |
+| patch            | Patch version that was released.                         |
+| paths_released   | Paths that were released.                                |
+| pr               | Pull request number.                                     |
+| prs              | Pull request numbers.                                    |
+| release-please   | All outputs from release-please action as a JSON string. |
+
+<!-- action-docs-outputs -->
+
+# License
+
+[CC0 1.0 Universal](http://creativecommons.org/publicdomain/zero/1.0/)
