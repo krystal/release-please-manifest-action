@@ -26,11 +26,11 @@ jobs:
           git tag -d "$MINOR_TAG" || true
           git push origin ":${MAJOR_TAG}" || true
           git push origin ":${MINOR_TAG}" || true
-          git tag -a "$MAJOR_TAG" -m "Release ${MAJOR_TAG}"
-          git tag -a "$MINOR_TAG" -m "Release ${MINOR_TAG}"
+          git tag -a "$MAJOR_TAG" -m "Release v${{ steps.release.outputs.version }}"
+          git tag -a "$MINOR_TAG" -m "Release v${{ steps.release.outputs.version }}"
           git push origin "$MAJOR_TAG"
           git push origin "$MINOR_TAG"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MAJOR_TAG: v${{ steps.release.outputs.major }}
           MINOR_TAG: v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}
