@@ -52,7 +52,7 @@ inputs:
   manifest-file:
     description: Path to manifest file within the project.
     required: false
-    default: ".github/release-please-manifest.json"
+    default: ".github/.release-please-manifest.json"
 
 outputs:
   release_created:

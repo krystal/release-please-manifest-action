@@ -40,10 +40,14 @@ running [release-please][] in [manifest mode][].
 - Optionally supports having release-please authenticate as a GitHub App.
 - By default places release-please config and manifest files within the
   top-level `.github` directory instead of in the repository root:
-  - `.github/release-please-manifest.json`
+  - `.github/.release-please-manifest.json`
   - `.github/release-please-config.json`
 
 # Examples
+
+All examples here assume you have places your `release-please-config.json` and
+`.release-please-manifest.json` within the `.github` folder in the root of the
+repository.
 
 ## Basic (Actions Token)
 
@@ -88,7 +92,7 @@ jobs:
         with:
           command: manifest
           config-file: .github/release-please-config.json
-          manifest-file: .github/release-please-manifest.json
+          manifest-file: .github/.release-please-manifest.json
 ```
 
 _Note: Outputs are not included in this equivalence example._
@@ -137,7 +141,7 @@ jobs:
           token: ${{ secrets.RELEASE_PAT_TOKEN }}
           command: manifest
           config-file: .github/release-please-config.json
-          manifest-file: .github/release-please-manifest.json
+          manifest-file: .github/.release-please-manifest.json
 ```
 
 _Note: Outputs are not included in this equivalence example._
@@ -203,7 +207,7 @@ jobs:
           token: ${{ steps.github-app-token.outputs.token }}
           command: manifest
           config-file: .github/release-please-config.json
-          manifest-file: .github/release-please-manifest.json
+          manifest-file: .github/.release-please-manifest.json
 ```
 
 _Note: Outputs are not included in this equivalence example._
@@ -216,18 +220,18 @@ _Note: Outputs are not included in this equivalence example._
 
 ## Inputs
 
-| parameter       | description                                                                                                                                                                                      | required | default                              |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------------------------ |
-| token           | GitHub token used to authenticate.                                                                                                                                                               | `false`  | ${{ github.token }}                  |
-| app-id          | ID of the GitHub App to use for authentication. If set, takes precedence over token input.                                                                                                       | `false`  |                                      |
-| private-key     | Private key of the GitHub App (can be Base64 encoded). Required when app-id is provided.                                                                                                         | `false`  |                                      |
-| installation-id | ID of the installation for which the app token will be requested. Defaults to the ID of the repository's installation.                                                                           | `false`  |                                      |
-| permissions     | JSON-stringified permissions granted to the app token. Defaults to all the GitHub app permissions, see: https://docs.github.com/en/rest/apps/apps#create-an-installation-access-token-for-an-app | `false`  |                                      |
-| github-api-url  | Configure github API URL.                                                                                                                                                                        | `false`  | ${{ github.api_url }}                |
-| repository      | The full name of the repository to operate on in owner/repo format. Defaults to the current repository.                                                                                          | `false`  | ${{ github.repository }}             |
-| default-branch  | Branch to open pull release PR against. Defaults to the repository's default branch.                                                                                                             | `false`  |                                      |
-| config-file     | Pat to config file within the project.                                                                                                                                                           | `false`  | .github/release-please-config.json   |
-| manifest-file   | Path to manifest file within the project.                                                                                                                                                        | `false`  | .github/release-please-manifest.json |
+| parameter       | description                                                                                                                                                                                      | required | default                               |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------------------------- |
+| token           | GitHub token used to authenticate.                                                                                                                                                               | `false`  | ${{ github.token }}                   |
+| app-id          | ID of the GitHub App to use for authentication. If set, takes precedence over token input.                                                                                                       | `false`  |                                       |
+| private-key     | Private key of the GitHub App (can be Base64 encoded). Required when app-id is provided.                                                                                                         | `false`  |                                       |
+| installation-id | ID of the installation for which the app token will be requested. Defaults to the ID of the repository's installation.                                                                           | `false`  |                                       |
+| permissions     | JSON-stringified permissions granted to the app token. Defaults to all the GitHub app permissions, see: https://docs.github.com/en/rest/apps/apps#create-an-installation-access-token-for-an-app | `false`  |                                       |
+| github-api-url  | Configure github API URL.                                                                                                                                                                        | `false`  | ${{ github.api_url }}                 |
+| repository      | The full name of the repository to operate on in owner/repo format. Defaults to the current repository.                                                                                          | `false`  | ${{ github.repository }}              |
+| default-branch  | Branch to open pull release PR against. Defaults to the repository's default branch.                                                                                                             | `false`  |                                       |
+| config-file     | Pat to config file within the project.                                                                                                                                                           | `false`  | .github/release-please-config.json    |
+| manifest-file   | Path to manifest file within the project.                                                                                                                                                        | `false`  | .github/.release-please-manifest.json |
 
 <!-- action-docs-inputs -->
 
