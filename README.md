@@ -38,16 +38,17 @@ running [release-please][] in [manifest mode][].
 
 - Focuses on and only supports running release-please's manifest command.
 - Optionally supports having release-please authenticate as a GitHub App.
-- By default places release-please config and manifest files within the
-  top-level `.github` directory instead of in the repository root:
-  - `.github/.release-please-manifest.json`
-  - `.github/release-please-config.json`
+- Defaults to looking for release-please's config and manifest files within the
+  top-level `.github` directory instead of in the repository root.
 
 # Examples
 
-All examples here assume you have places your `release-please-config.json` and
-`.release-please-manifest.json` within the `.github` folder in the root of the
-repository.
+All examples assume you have placed your `release-please-config.json` and
+`.release-please-manifest.json` within the `.github` directory in the root of
+the repository.
+
+See release-please's [manifest-releaser][manifest mode] documentation for
+details about the config and manifest files.
 
 ## Basic (Actions Token)
 
