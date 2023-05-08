@@ -1,5 +1,5 @@
 ---
-name: "release-please-action"
+name: "release-please-manifest-action"
 description: >-
   Opinionated action for running release-please in manifest mode with optional
   support to authenticate as a GitHub App.
