@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/jimeh/release-please-manifest-action/compare/v1.0.0...v1.0.1) (2023-05-08)
+
+
+### Bug Fixes
+
+* **action:** set correct action name in action.yml metadata ([#10](https://github.com/jimeh/release-please-manifest-action/issues/10)) ([322dcdf](https://github.com/jimeh/release-please-manifest-action/commit/322dcdf56ed8be4589ffbd70cb1382198ca65120))
+
 ## [1.0.0](https://github.com/jimeh/release-please-manifest-action/compare/v0.1.1...v1.0.0) (2023-05-08)
 
 
