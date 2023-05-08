@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.0](https://github.com/jimeh/release-please-manifest-action/compare/v0.0.6...v0.1.0) (2023-05-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* **action:** Change default manifest path to `.github/.release-please-manifest.json`.
+
+### Features
+
+* **action:** change default manifest file path ([4d6baa6](https://github.com/jimeh/release-please-manifest-action/commit/4d6baa6f81afde8c72681281cc4f6a9f675b8dda))
+
 ## [0.0.6](https://github.com/jimeh/release-please-manifest-action/compare/v0.0.5...v0.0.6) (2023-05-08)
 
 
