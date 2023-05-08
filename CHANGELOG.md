@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/jimeh/release-please-manifest-action/compare/v0.1.0...v0.1.1) (2023-05-08)
+
+
+### Features
+
+* **release:** rename CI workflow to Release ([1139eae](https://github.com/jimeh/release-please-manifest-action/commit/1139eaec31e83556c1eb35a523ee76485efb9ab5))
+
 ## [0.1.0](https://github.com/jimeh/release-please-manifest-action/compare/v0.0.6...v0.1.0) (2023-05-08)
 
 
