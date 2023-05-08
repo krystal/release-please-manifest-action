@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0](https://github.com/jimeh/release-please-manifest-action/compare/v0.1.1...v1.0.0) (2023-05-08)
+
+
+### Features
+
+* **release:** prepare for v1.0.0 ([22f0022](https://github.com/jimeh/release-please-manifest-action/commit/22f0022a0932f5639bb4808df16e76c245256880))
+
 ## [0.1.1](https://github.com/jimeh/release-please-manifest-action/compare/v0.1.0...v0.1.1) (2023-05-08)
 
 
