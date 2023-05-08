@@ -1,11 +1,13 @@
 ---
-name: CI
-on: push
+name: Release
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     steps:
       - uses: jimeh/release-please-manifest-action@main
         id: release
