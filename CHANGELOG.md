@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.0.6](https://github.com/jimeh/release-please-manifest-action/compare/v0.0.5...v0.0.6) (2023-05-08)
+
+
+### Features
+
+* **release:** remove use of GitHub App ([b60e27b](https://github.com/jimeh/release-please-manifest-action/commit/b60e27befea7298731468ae0a66eff098c362d86))
+
+
+### Bug Fixes
+
+* **release:** attempt to fix release job permissions ([c2d8586](https://github.com/jimeh/release-please-manifest-action/commit/c2d85862fdd1bdcb9b7b10dcb3d35d3d60f4afc6))
+* **release:** remove permissions block ([04d3b1e](https://github.com/jimeh/release-please-manifest-action/commit/04d3b1edbb4c7bd5f1b63b6bb3f65ca738ee1e52))
+
 ## [0.0.5](https://github.com/jimeh/release-please-manifest-action/compare/v0.0.4...v0.0.5) (2023-05-07)
 
 
