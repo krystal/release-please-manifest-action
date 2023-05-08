@@ -67,9 +67,6 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
       - uses: jimeh/release-please-manifest-action@v0
 ```
@@ -85,9 +82,6 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
       - uses: google-github-actions/release-please-action@v3
         id: release-please
@@ -119,9 +113,6 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
       - uses: jimeh/release-please-manifest-action@v0
         with:
@@ -139,9 +130,6 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
       - uses: google-github-actions/release-please-action@v3
         id: release-please
