@@ -2,13 +2,14 @@
 name: CI
 on: push
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   release-please:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
       - uses: jimeh/release-please-manifest-action@main
         id: release
