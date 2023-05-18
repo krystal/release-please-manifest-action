@@ -11,17 +11,10 @@ jobs:
     steps:
       - uses: jimeh/release-please-manifest-action@main
         id: release
-      - name: Create/update MAJOR tag
+      - name: MAJOR and MAJOR.MINOR tags
         if: ${{ steps.release.outputs.release_created }}
-        uses: richardsimko/update-tag@v1
+        uses: jimeh/update-tags-action@v1
         with:
-          tag_name: v${{ steps.release.outputs.major }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create/update MAJOR.MINOR tag
-        if: ${{ steps.release.outputs.release_created }}
-        uses: richardsimko/update-tag@v1
-        with:
-          tag_name: v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tags: |
+            v${{ steps.release.outputs.major }}
+            v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}
