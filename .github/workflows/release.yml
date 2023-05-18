@@ -9,7 +9,7 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-      - uses: jimeh/release-please-manifest-action@main
+      - uses: jimeh/release-please-manifest-action@v1
         id: release
       - name: MAJOR and MAJOR.MINOR tags
         if: ${{ steps.release.outputs.release_created }}
