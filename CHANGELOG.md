@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/jimeh/release-please-manifest-action/compare/v1.0.1...v1.0.2) (2023-05-18)
+
+
+### Bug Fixes
+
+* **action:** correct minor typo in action metadata ([#14](https://github.com/jimeh/release-please-manifest-action/issues/14)) ([f307f17](https://github.com/jimeh/release-please-manifest-action/commit/f307f175b93d8eb1a1a4dfaf9092efaba72a6d62))
+
 ## [1.0.1](https://github.com/jimeh/release-please-manifest-action/compare/v1.0.0...v1.0.1) (2023-05-08)
 
 
