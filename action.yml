@@ -7,8 +7,7 @@ author: "jimeh"
 
 inputs:
   token:
-    description: >-
-      GitHub token used to authenticate.
+    description: "GitHub token used to authenticate."
     required: false
     default: ${{ github.token }}
   app-id:
@@ -71,7 +70,7 @@ outputs:
     description: "Release tag name."
     value: ${{ steps.release-please.outputs.tag_name }}
   sha:
-    description: "Release sha"
+    description: "Release SHA."
     value: ${{ steps.release-please.outputs.sha }}
   body:
     description: "Release body."
@@ -126,7 +125,7 @@ runs:
         permissions: ${{ inputs.permissions }}
         private_key: ${{ inputs.private-key }}
         repository: ${{ github.repository }}
-    - name: Determine which token to use
+    - name: resolve token
       id: token
       run: |-
         echo "token=${APP_TOKEN:-$INPUT_TOKEN}" >> "$GITHUB_OUTPUT"

@@ -247,7 +247,7 @@ _Note: Outputs are not included in this equivalence example._
 | id               | Release ID.                                              |
 | name             | Release name.                                            |
 | tag_name         | Release tag name.                                        |
-| sha              | Release sha                                              |
+| sha              | Release SHA.                                             |
 | body             | Release body.                                            |
 | html_url         | Release URL.                                             |
 | draft            | Whether or not the release is a draft.                   |
