@@ -1,0 +1,30 @@
+---
+name: Release
+on: push
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: make docs
+      - name: Verify no changes after docs build
+        run: |
+          git diff --exit-code
+
+  release-please:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: jimeh/release-please-manifest-action@v1
+        id: release
+      - name: MAJOR and MAJOR.MINOR tags
+        if: ${{ steps.release.outputs.release_created }}
+        uses: jimeh/update-tags-action@v1
+        with:
+          tags: |
+            v${{ steps.release.outputs.major }}
+            v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}
