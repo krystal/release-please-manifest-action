@@ -21,6 +21,9 @@ jobs:
     steps:
       - uses: jimeh/release-please-manifest-action@v1
         id: release
+        with:
+          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
       - name: MAJOR and MAJOR.MINOR tags
         if: ${{ steps.release.outputs.release_created }}
         uses: jimeh/update-tags-action@v1
