@@ -9,23 +9,28 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/jimeh/release-please-manifest-action/releases">
-    <img src="https://img.shields.io/github/v/tag/jimeh/release-please-manifest-action?label=release" alt="GitHub tag (latest SemVer)">
+  <a href="https://github.com/krystal/release-please-manifest-action/releases">
+    <img src="https://img.shields.io/github/v/tag/krystal/release-please-manifest-action?label=release" alt="GitHub tag (latest SemVer)">
   </a>
-  <a href="https://github.com/jimeh/release-please-manifest-action/issues">
-    <img src="https://img.shields.io/github/issues-raw/jimeh/release-please-manifest-action.svg?style=flat&logo=github&logoColor=white" alt="GitHub issues">
+  <a href="https://github.com/krystal/release-please-manifest-action/issues">
+    <img src="https://img.shields.io/github/issues-raw/krystal/release-please-manifest-action.svg?style=flat&logo=github&logoColor=white" alt="GitHub issues">
   </a>
-  <a href="https://github.com/jimeh/release-please-manifest-action/pulls">
-    <img src="https://img.shields.io/github/issues-pr-raw/jimeh/release-please-manifest-action.svg?style=flat&logo=github&logoColor=white" alt="GitHub pull requests">
+  <a href="https://github.com/krystal/release-please-manifest-action/pulls">
+    <img src="https://img.shields.io/github/issues-pr-raw/krystal/release-please-manifest-action.svg?style=flat&logo=github&logoColor=white" alt="GitHub pull requests">
   </a>
-  <a href="https://github.com/jimeh/release-please-manifest-action/blob/master/LICENSE">
-    <img src="https://img.shields.io/github/license/jimeh/release-please-manifest-action.svg?style=flat" alt="License Status">
+  <a href="https://github.com/krystal/release-please-manifest-action/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/krystal/release-please-manifest-action.svg?style=flat" alt="License Status">
   </a>
 </p>
 
 A composite action which wraps [release-please-action][] and
 [github-app-token][] actions, with opinionated default settings focused on
 running [release-please][] in [manifest mode][].
+
+_Note: This is a fork of
+[`jimeh/release-please-manifest-action`](https://github.com/jimeh/release-please-manifest-action),
+customized by [@krystal](https://github.com/krystal) for their own needs.
+Upstream changes will be included as appropriate._
 
 [release-please-action]:
   https://github.com/google-github-actions/release-please-action
@@ -73,7 +78,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: jimeh/release-please-manifest-action@v1
+      - uses: krystal/release-please-manifest-action@v1
 ```
 
 <!-- x-release-please-end -->
@@ -119,7 +124,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: jimeh/release-please-manifest-action@v1
+      - uses: krystal/release-please-manifest-action@v1
         with:
           token: ${{ secrets.RELEASE_PAT_TOKEN }}
 ```
@@ -179,7 +184,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: jimeh/release-please-manifest-action@v1
+      - uses: krystal/release-please-manifest-action@v1
         with:
           app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
           private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
