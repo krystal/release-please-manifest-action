@@ -132,7 +132,7 @@ runs:
         APP_TOKEN: "${{ steps.github-app-token.outputs.token }}"
         INPUT_TOKEN: "${{ inputs.token }}"
       shell: bash
-    - uses: google-github-actions/release-please-action@v3
+    - uses: googleapis/release-please-action@v3
       id: release-please
       with:
         command: manifest
