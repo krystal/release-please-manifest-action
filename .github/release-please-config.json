@@ -9,6 +9,7 @@
       ],
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true,
+      "always-update": true,
       "draft": false,
       "prerelease": false,
       "initial-version": "1.0.0"
