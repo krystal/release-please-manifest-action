@@ -7,85 +7,86 @@ author: "krystal"
 inputs:
   token:
     description: "GitHub token used to authenticate."
-    required: false
     default: ${{ github.token }}
   app-id:
     description: >-
       ID of the GitHub App to use for authentication. If set, takes precedence
       over token input.
-    required: false
   private-key:
     description: >-
       Private key of the GitHub App (can be Base64 encoded). Required when
       app-id is provided.
-    required: false
-  installation-id:
+  installation-retrieval-mode:
     description: >-
-      ID of the installation for which the app token will be requested. Defaults
-      to the ID of the repository's installation.
+      When using app authentication, the mode used to retrieve the installation
+      for which the token will be requested. For more information, see:
+      https://github.com/tibdex/github-app-token/blob/v2/action.yml
+    default: repository
+  installation-retrieval-payload:
+    description: >-
+      When using app authentication, the payload used to retrieve the
+      installation. For more information, see:
+      https://github.com/tibdex/github-app-token/blob/v2/action.yml
+    default: ${{ github.repository }}
+  repositories:
+    description: >-
+      When using app authentication, the JSON-stringified array of the full names
+      of the repositories the token should have access to. Defaults to all
+      repositories that the installation can access. See
+      https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#create-an-installation-access-token-for-an-app's
+      `repositories`.
   permissions:
     description: >-
       JSON-stringified permissions granted to the app token. Defaults to all the
       GitHub app permissions, see:
       https://docs.github.com/en/rest/apps/apps#create-an-installation-access-token-for-an-app
   github-api-url:
-    description: Configure github API URL.
-    required: false
+    description: >-
+      Configure github API URL. Default `https://api.github.com`
     default: ${{ github.api_url }}
+  github-graphql-url:
+    description: >-
+      Configure github GraphQL URL. Default `https://api.github.com/graphql`
+    default: ${{ github.graphql_url }}
   repository:
     description: >-
       The full name of the repository to operate on in owner/repo format.
       Defaults to the current repository.
     default: ${{ github.repository }}
-  default-branch:
+  target-branch:
     description: >-
       Branch to open pull release PR against. Defaults to the repository's
       default branch.
-    required: false
+    default: ""
+  target-branch-pattern:
+    description: >-
+      Regular expression pattern to determine if current ref name is a target
+      branch or not. When specified, the action will only run if the current
+      ref name matches the pattern, and the current ref name will be used as the
+      target branch. When not specified, the action will always run, and target
+      the specified target-branch, or the repository's default branch if
+      target-branch is not specified.
     default: ""
   config-file:
-    description: Pat to config file within the project.
-    required: false
+    description: Path to config file within the project.
     default: ".github/release-please-config.json"
   manifest-file:
     description: Path to manifest file within the project.
-    required: false
     default: ".github/.release-please-manifest.json"
 
 outputs:
   release_created:
     description: "Whether or not a release was created."
     value: ${{ steps.release-please.outputs.release_created }}
-  releases_created:
-    description: "Whether or not a release was created."
-    value: ${{ steps.release-please.outputs.releases_created }}
-  id:
-    description: "Release ID."
-    value: ${{ steps.release-please.outputs.id }}
-  name:
-    description: "Release name."
-    value: ${{ steps.release-please.outputs.name }}
-  tag_name:
-    description: "Release tag name."
-    value: ${{ steps.release-please.outputs.tag_name }}
-  sha:
-    description: "Release SHA."
-    value: ${{ steps.release-please.outputs.sha }}
-  body:
-    description: "Release body."
-    value: ${{ steps.release-please.outputs.body }}
-  html_url:
-    description: "Release URL."
-    value: ${{ steps.release-please.outputs.html_url }}
-  draft:
-    description: "Whether or not the release is a draft."
-    value: ${{ steps.release-please.outputs.draft }}
   upload_url:
     description: "Release upload URL."
     value: ${{ steps.release-please.outputs.upload_url }}
-  path:
-    description: "Path that was released."
-    value: ${{ steps.release-please.outputs.path }}
+  html_url:
+    description: "Release URL."
+    value: ${{ steps.release-please.outputs.html_url }}
+  tag_name:
+    description: "Release tag name."
+    value: ${{ steps.release-please.outputs.tag_name }}
   version:
     description: "Version that was released."
     value: ${{ steps.release-please.outputs.version }}
@@ -98,48 +99,96 @@ outputs:
   patch:
     description: "Patch version that was released."
     value: ${{ steps.release-please.outputs.patch }}
-  paths_released:
-    description: "Paths that were released."
-    value: ${{ steps.release-please.outputs.paths_released }}
+  sha:
+    description: "Release SHA."
+    value: ${{ steps.release-please.outputs.sha }}
   pr:
     description: "Pull request number."
     value: ${{ steps.release-please.outputs.pr }}
+  path:
+    description: "Path that was released."
+    value: ${{ steps.release-please.outputs.path }}
+  releases_created:
+    description: "Whether or not a release was created."
+    value: ${{ steps.release-please.outputs.releases_created }}
+  paths_released:
+    description: "Paths that were released."
+    value: ${{ steps.release-please.outputs.paths_released }}
+  id:
+    description: "Release ID."
+    value: ${{ steps.release-please.outputs.id }}
+  name:
+    description: "Release name."
+    value: ${{ steps.release-please.outputs.name }}
+  body:
+    description: "Release body."
+    value: ${{ steps.release-please.outputs.body }}
+  draft:
+    description: "Whether or not the release is a draft."
+    value: ${{ steps.release-please.outputs.draft }}
+  prs_created:
+    description: "Whether or not a pull request was created."
+    value: ${{ steps.release-please.outputs.prs_created }}
+  pr_number:
+    description: "Pull request number that created the release."
+    value: ${{ steps.release-please.outputs.prNumber }}
   prs:
     description: "Pull request numbers."
     value: ${{ steps.release-please.outputs.prs }}
-  release-please:
+  raw:
     description: "All outputs from release-please action as a JSON string."
     value: ${{ toJSON(steps.release-please.outputs) }}
 
 runs:
   using: "composite"
   steps:
-    - uses: tibdex/github-app-token@v1
-      if: inputs.app-id != null && inputs.app-id != ''
+    - name: prepare
+      shell: bash
+      id: prepare
+      run: |
+        if [[ -n "$TARGET_BRANCH_PATTERN" ]]; then
+          if [[ "$GITHUB_REF_NAME" =~ $TARGET_BRANCH_PATTERN ]]; then
+            RUN="true"
+            TARGET="$GITHUB_REF_NAME"
+          fi
+        else
+          RUN="true"
+        fi
+
+        echo "target_branch=${TARGET:-$TARGET_BRANCH}" >> "$GITHUB_OUTPUT"
+        echo "run=${RUN:-false}" >> "$GITHUB_OUTPUT"
+      env:
+        TARGET_BRANCH: "${{ inputs.target-branch }}"
+        TARGET_BRANCH_PATTERN: "${{ inputs.target-branch-pattern }}"
+    - uses: tibdex/github-app-token@v2
+      if: steps.prepare.outputs.run == 'true' && inputs.app-id != null && inputs.app-id != ''
       id: github-app-token
       with:
         app_id: ${{ inputs.app-id }}
-        installation_id: ${{ inputs.installation-id }}
         github_api_url: ${{ inputs.github-api-url }}
+        installation_retrieval_mode: ${{ inputs.installation-retrieval-mode }}
+        installation_retrieval_payload: ${{ inputs.installation-retrieval-payload }}
         permissions: ${{ inputs.permissions }}
         private_key: ${{ inputs.private-key }}
-        repository: ${{ github.repository }}
+        repositories: ${{ inputs.repositories }}
+        revoke: true
     - name: resolve token
+      if: steps.prepare.outputs.run == 'true'
       id: token
+      shell: bash
       run: |-
         echo "token=${APP_TOKEN:-$INPUT_TOKEN}" >> "$GITHUB_OUTPUT"
       env:
         APP_TOKEN: "${{ steps.github-app-token.outputs.token }}"
         INPUT_TOKEN: "${{ inputs.token }}"
-      shell: bash
-    - uses: googleapis/release-please-action@v3
+    - uses: googleapis/release-please-action@v4
+      if: steps.prepare.outputs.run == 'true'
       id: release-please
       with:
-        command: manifest
         token: ${{ steps.token.outputs.token }}
-        default-branch: ${{ inputs.default-branch }}
+        target-branch: ${{ steps.prepare.outputs.target_branch }}
         config-file: ${{ inputs.config-file }}
         manifest-file: ${{ inputs.manifest-file }}
         github-api-url: ${{ inputs.github-api-url }}
-        github-graphql-url: ${{ inputs.github-api-url }}
+        github-graphql-url: ${{ inputs.github-graphql-url }}
         repo-url: ${{ inputs.repository }}

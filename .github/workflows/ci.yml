@@ -6,10 +6,10 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 16
+          node-version: 20
       - run: make docs
       - name: Verify no changes after docs build
         run: |
@@ -19,14 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: jimeh/release-please-manifest-action@v1
+      - uses: krystal/release-please-manifest-action@68c5fc11479050edc1241ca43ac093c6af497619 # v1.0.1
         id: release
         with:
           app-id: ${{ vars.RELEASE_PLEASE_GITHUB_APP_ID }}
           private-key: ${{ secrets.RELEASE_PLEASE_GITHUB_APP_PRIVATE_KEY }}
       - name: MAJOR and MAJOR.MINOR tags
         if: ${{ steps.release.outputs.release_created }}
-        uses: jimeh/update-tags-action@v1
+        uses: jimeh/update-tags-action@e58fa0f2f874a12bf0eb90ef8ab4256808c0f373 # v1.0.1
         with:
           tags: |
             v${{ steps.release.outputs.major }}

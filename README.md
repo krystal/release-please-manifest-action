@@ -9,31 +9,21 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/krystal/release-please-manifest-action/releases">
-    <img src="https://img.shields.io/github/v/tag/krystal/release-please-manifest-action?label=release" alt="GitHub tag (latest SemVer)">
-  </a>
-  <a href="https://github.com/krystal/release-please-manifest-action/issues">
-    <img src="https://img.shields.io/github/issues-raw/krystal/release-please-manifest-action.svg?style=flat&logo=github&logoColor=white" alt="GitHub issues">
-  </a>
-  <a href="https://github.com/krystal/release-please-manifest-action/pulls">
-    <img src="https://img.shields.io/github/issues-pr-raw/krystal/release-please-manifest-action.svg?style=flat&logo=github&logoColor=white" alt="GitHub pull requests">
-  </a>
-  <a href="https://github.com/krystal/release-please-manifest-action/blob/master/LICENSE">
-    <img src="https://img.shields.io/github/license/krystal/release-please-manifest-action.svg?style=flat" alt="License Status">
-  </a>
+  <a href="https://github.com/krystal/release-please-manifest-action/releases"><img src="https://img.shields.io/github/v/tag/krystal/release-please-manifest-action?label=release" alt="GitHub tag (latest SemVer)"></a>
+  <a href="https://github.com/krystal/release-please-manifest-action/issues"><img src="https://img.shields.io/github/issues-raw/krystal/release-please-manifest-action.svg?style=flat&logo=github&logoColor=white" alt="GitHub issues"></a>
+  <a href="https://github.com/krystal/release-please-manifest-action/pulls"><img src="https://img.shields.io/github/issues-pr-raw/krystal/release-please-manifest-action.svg?style=flat&logo=github&logoColor=white" alt="GitHub pull requests"></a>
+  <a href="https://github.com/krystal/release-please-manifest-action/blob/master/LICENSE"><img src="https://img.shields.io/github/license/krystal/release-please-manifest-action.svg?style=flat" alt="License Status"></a>
 </p>
 
 A composite action which wraps [release-please-action][] and
-[github-app-token][] actions, with opinionated default settings focused on
-running [release-please][] in [manifest mode][].
+[github-app-token][] actions, with opinionated defaults.
 
 _Note: This is a fork of
 [`jimeh/release-please-manifest-action`](https://github.com/jimeh/release-please-manifest-action),
 customized by [@krystal](https://github.com/krystal) for their own needs.
 Upstream changes will be included as appropriate._
 
-[release-please-action]:
-  https://github.com/google-github-actions/release-please-action
+[release-please-action]: https://github.com/googleapis/release-please-action
 [github-app-token]: https://github.com/tibdex/github-app-token
 [release-please]: https://github.com/googleapis/release-please
 [manifest mode]:
@@ -41,16 +31,27 @@ Upstream changes will be included as appropriate._
 
 # Features
 
-- Focuses on and only supports running release-please's manifest command.
-- Optionally supports having release-please authenticate as a GitHub App.
+- Supports having release-please authenticate as a GitHub App.
+- Supports dynamic target branch based on regular expression pattern, enabling
+  maintenance releases.
 - Defaults to looking for release-please's config and manifest files within the
   top-level `.github` directory instead of in the repository root.
 
-# Examples
+_Note: This action is not well suited for multi package/root release-please
+configurations, as it does not support dynamic path-based outputs. A workaround
+is to parse the `raw` output JSON string, but this is not ideal._
 
-All examples assume you have placed your `release-please-config.json` and
-`.release-please-manifest.json` within the `.github` directory in the root of
-the repository.
+# Breaking changes from v1 to v2
+
+- `default-branch` input was renamed to `target-branch`.
+- `installation-id` input has been replaced by `installation-retrieval-mode`.
+- `release-please` output was renamed to `raw`.
+
+# Usage
+
+All usage examples below assume you have placed your
+`release-please-config.json` and `.release-please-manifest.json` within the
+`.github` directory in the root of the repository.
 
 See release-please's [manifest-releaser][manifest mode] documentation for
 details about the config and manifest files.
@@ -93,10 +94,9 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: google-github-actions/release-please-action@v3
+      - uses: googleapis/release-please-action@v4
         id: release-please
         with:
-          command: manifest
           config-file: .github/release-please-config.json
           manifest-file: .github/.release-please-manifest.json
 ```
@@ -141,11 +141,10 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: google-github-actions/release-please-action@v3
+      - uses: googleapis/release-please-action@v4
         id: release-please
         with:
           token: ${{ secrets.RELEASE_PAT_TOKEN }}
-          command: manifest
           config-file: .github/release-please-config.json
           manifest-file: .github/.release-please-manifest.json
 ```
@@ -202,16 +201,15 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: tibdex/github-app-token@v1
+      - uses: tibdex/github-app-token@v2
         id: github-app-token
         with:
           app_id: ${{ secrets.RELEASE_BOT_APP_ID }}
           private_key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
-      - uses: google-github-actions/release-please-action@v3
+      - uses: googleapis/release-please-action@v4
         id: release-please
         with:
           token: ${{ steps.github-app-token.outputs.token }}
-          command: manifest
           config-file: .github/release-please-config.json
           manifest-file: .github/.release-please-manifest.json
 ```
@@ -220,24 +218,54 @@ _Note: Outputs are not included in this equivalence example._
 
 </details>
 
+## Maintenance Releases
+
+The `target-branch-pattern` input allows for dynamic targeting of different
+branches. This means if you, for example, specify
+`^(main|release-[0-9]+(\.[0-9]+)?)$` as the pattern, release-please will run
+against the `main` branch, but also against any branch named `release-X` or
+`release-X.X`, where `X` is one or more numbers.
+
+The practical use of this looks something like this:
+
+- The `main` branch is used for latest development and latest releases. Let's
+  assume it is on version 1.5.7 right now.
+- The `release-1.4` branch was created from the latest 1.4.x tag, and fixes are
+  backported to it from `main`.
+- When `main` is pushed to, release-please will create a release PR to merge
+  into `main` that bumps the version accordingly.
+- When `release-1.4` is pushed to, release-please will create a release PR
+  against the `release-1.4` branch instead of `main`, so a new 1.4.x release can
+  be safely created.
+
+The thing to be careful of when working on maintenance branches is that release-
+please might try and bump the minor or even major version just like it would in
+`main` depending on the commit types. This should be overridden by either doing
+an empty commit with a `Release-As:` footer, or by modifying the commit types
+when cherry picking.
+
 # Reference
 
 <!-- action-docs-inputs -->
 
 ## Inputs
 
-| parameter       | description                                                                                                                                                                                      | required | default                               |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------------------------- |
-| token           | GitHub token used to authenticate.                                                                                                                                                               | `false`  | ${{ github.token }}                   |
-| app-id          | ID of the GitHub App to use for authentication. If set, takes precedence over token input.                                                                                                       | `false`  |                                       |
-| private-key     | Private key of the GitHub App (can be Base64 encoded). Required when app-id is provided.                                                                                                         | `false`  |                                       |
-| installation-id | ID of the installation for which the app token will be requested. Defaults to the ID of the repository's installation.                                                                           | `false`  |                                       |
-| permissions     | JSON-stringified permissions granted to the app token. Defaults to all the GitHub app permissions, see: https://docs.github.com/en/rest/apps/apps#create-an-installation-access-token-for-an-app | `false`  |                                       |
-| github-api-url  | Configure github API URL.                                                                                                                                                                        | `false`  | ${{ github.api_url }}                 |
-| repository      | The full name of the repository to operate on in owner/repo format. Defaults to the current repository.                                                                                          | `false`  | ${{ github.repository }}              |
-| default-branch  | Branch to open pull release PR against. Defaults to the repository's default branch.                                                                                                             | `false`  |                                       |
-| config-file     | Pat to config file within the project.                                                                                                                                                           | `false`  | .github/release-please-config.json    |
-| manifest-file   | Path to manifest file within the project.                                                                                                                                                        | `false`  | .github/.release-please-manifest.json |
+| parameter                      | description                                                                                                                                                                                                                                                                                                                                                                                            | required | default                               |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------------------------- |
+| token                          | GitHub token used to authenticate.                                                                                                                                                                                                                                                                                                                                                                     | `false`  | ${{ github.token }}                   |
+| app-id                         | ID of the GitHub App to use for authentication. If set, takes precedence over token input.                                                                                                                                                                                                                                                                                                             | `false`  |                                       |
+| private-key                    | Private key of the GitHub App (can be Base64 encoded). Required when app-id is provided.                                                                                                                                                                                                                                                                                                               | `false`  |                                       |
+| installation-retrieval-mode    | When using app authentication, the mode used to retrieve the installation for which the token will be requested. For more information, see: https://github.com/tibdex/github-app-token/blob/v2/action.yml                                                                                                                                                                                              | `false`  | repository                            |
+| installation-retrieval-payload | When using app authentication, the payload used to retrieve the installation. For more information, see: https://github.com/tibdex/github-app-token/blob/v2/action.yml                                                                                                                                                                                                                                 | `false`  | ${{ github.repository }}              |
+| repositories                   | When using app authentication, the JSON-stringified array of the full names of the repositories the token should have access to. Defaults to all repositories that the installation can access. See https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#create-an-installation-access-token-for-an-app's `repositories`.                                                                   | `false`  |                                       |
+| permissions                    | JSON-stringified permissions granted to the app token. Defaults to all the GitHub app permissions, see: https://docs.github.com/en/rest/apps/apps#create-an-installation-access-token-for-an-app                                                                                                                                                                                                       | `false`  |                                       |
+| github-api-url                 | Configure github API URL. Default `https://api.github.com`                                                                                                                                                                                                                                                                                                                                             | `false`  | ${{ github.api_url }}                 |
+| github-graphql-url             | Configure github GraphQL URL. Default `https://api.github.com/graphql`                                                                                                                                                                                                                                                                                                                                 | `false`  | ${{ github.graphql_url }}             |
+| repository                     | The full name of the repository to operate on in owner/repo format. Defaults to the current repository.                                                                                                                                                                                                                                                                                                | `false`  | ${{ github.repository }}              |
+| target-branch                  | Branch to open pull release PR against. Defaults to the repository's default branch.                                                                                                                                                                                                                                                                                                                   | `false`  |                                       |
+| target-branch-pattern          | Regular expression pattern to determine if current ref name is a target branch or not. When specified, the action will only run if the current ref name matches the pattern, and the current ref name will be used as the target branch. When not specified, the action will always run, and target the specified target-branch, or the repository's default branch if target-branch is not specified. | `false`  |                                       |
+| config-file                    | Path to config file within the project.                                                                                                                                                                                                                                                                                                                                                                | `false`  | .github/release-please-config.json    |
+| manifest-file                  | Path to manifest file within the project.                                                                                                                                                                                                                                                                                                                                                              | `false`  | .github/.release-please-manifest.json |
 
 <!-- action-docs-inputs -->
 
@@ -248,24 +276,26 @@ _Note: Outputs are not included in this equivalence example._
 | parameter        | description                                              |
 | ---------------- | -------------------------------------------------------- |
 | release_created  | Whether or not a release was created.                    |
-| releases_created | Whether or not a release was created.                    |
-| id               | Release ID.                                              |
-| name             | Release name.                                            |
-| tag_name         | Release tag name.                                        |
-| sha              | Release SHA.                                             |
-| body             | Release body.                                            |
-| html_url         | Release URL.                                             |
-| draft            | Whether or not the release is a draft.                   |
 | upload_url       | Release upload URL.                                      |
-| path             | Path that was released.                                  |
+| html_url         | Release URL.                                             |
+| tag_name         | Release tag name.                                        |
 | version          | Version that was released.                               |
 | major            | Major version that was released.                         |
 | minor            | Minor version that was released.                         |
 | patch            | Patch version that was released.                         |
-| paths_released   | Paths that were released.                                |
+| sha              | Release SHA.                                             |
 | pr               | Pull request number.                                     |
+| path             | Path that was released.                                  |
+| releases_created | Whether or not a release was created.                    |
+| paths_released   | Paths that were released.                                |
+| id               | Release ID.                                              |
+| name             | Release name.                                            |
+| body             | Release body.                                            |
+| draft            | Whether or not the release is a draft.                   |
+| prs_created      | Whether or not a pull request was created.               |
+| pr_number        | Pull request number that created the release.            |
 | prs              | Pull request numbers.                                    |
-| release-please   | All outputs from release-please action as a JSON string. |
+| raw              | All outputs from release-please action as a JSON string. |
 
 <!-- action-docs-outputs -->
 
