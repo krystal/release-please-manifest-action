@@ -9,18 +9,10 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/krystal/release-please-manifest-action/releases">
-    <img src="https://img.shields.io/github/v/tag/krystal/release-please-manifest-action?label=release" alt="GitHub tag (latest SemVer)">
-  </a>
-  <a href="https://github.com/krystal/release-please-manifest-action/issues">
-    <img src="https://img.shields.io/github/issues-raw/krystal/release-please-manifest-action.svg?style=flat&logo=github&logoColor=white" alt="GitHub issues">
-  </a>
-  <a href="https://github.com/krystal/release-please-manifest-action/pulls">
-    <img src="https://img.shields.io/github/issues-pr-raw/krystal/release-please-manifest-action.svg?style=flat&logo=github&logoColor=white" alt="GitHub pull requests">
-  </a>
-  <a href="https://github.com/krystal/release-please-manifest-action/blob/master/LICENSE">
-    <img src="https://img.shields.io/github/license/krystal/release-please-manifest-action.svg?style=flat" alt="License Status">
-  </a>
+  <a href="https://github.com/krystal/release-please-manifest-action/releases"><img src="https://img.shields.io/github/v/tag/krystal/release-please-manifest-action?label=release" alt="GitHub tag (latest SemVer)"></a>
+  <a href="https://github.com/krystal/release-please-manifest-action/issues"><img src="https://img.shields.io/github/issues-raw/krystal/release-please-manifest-action.svg?style=flat&logo=github&logoColor=white" alt="GitHub issues"></a>
+  <a href="https://github.com/krystal/release-please-manifest-action/pulls"><img src="https://img.shields.io/github/issues-pr-raw/krystal/release-please-manifest-action.svg?style=flat&logo=github&logoColor=white" alt="GitHub pull requests"></a>
+  <a href="https://github.com/krystal/release-please-manifest-action/blob/master/LICENSE"><img src="https://img.shields.io/github/license/krystal/release-please-manifest-action.svg?style=flat" alt="License Status"></a>
 </p>
 
 A composite action which wraps [release-please-action][] and
