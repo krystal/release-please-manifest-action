@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/krystal/release-please-manifest-action/compare/v2.0.0...v3.0.0) (2025-10-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** Removed various app token related inputs not available in new underlying action. Please see updated list of inputs in README.
+
+### Features
+
+* **deps:** migrate to actions/create-github-app-token ([#7](https://github.com/krystal/release-please-manifest-action/issues/7)) ([221b0b8](https://github.com/krystal/release-please-manifest-action/commit/221b0b85603f9c92ee59410c7172139915b4ee9f))
+
 ## [2.0.0](https://github.com/krystal/release-please-manifest-action/compare/v1.0.1...v2.0.0) (2025-05-22)
 
 

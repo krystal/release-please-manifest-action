@@ -70,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: krystal/release-please-manifest-action@v2
+      - uses: krystal/release-please-manifest-action@v3
 ```
 
 <!-- x-release-please-end -->
@@ -115,7 +115,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: krystal/release-please-manifest-action@v2
+      - uses: krystal/release-please-manifest-action@v3
         with:
           token: ${{ secrets.RELEASE_PAT_TOKEN }}
 ```
@@ -173,7 +173,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: krystal/release-please-manifest-action@v2
+      - uses: krystal/release-please-manifest-action@v3
         with:
           app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
           private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
