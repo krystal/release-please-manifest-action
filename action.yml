@@ -16,43 +16,6 @@ inputs:
     description: >-
       Private key of the GitHub App (can be Base64 encoded). Required when
       app-id is provided.
-  installation-retrieval-mode:
-    description: >-
-      When using app authentication, the mode used to retrieve the installation
-      for which the token will be requested. For more information, see:
-      https://github.com/tibdex/github-app-token/blob/v2/action.yml
-    default: repository
-  installation-retrieval-payload:
-    description: >-
-      When using app authentication, the payload used to retrieve the
-      installation. For more information, see:
-      https://github.com/tibdex/github-app-token/blob/v2/action.yml
-    default: ${{ github.repository }}
-  repositories:
-    description: >-
-      When using app authentication, the JSON-stringified array of the full names
-      of the repositories the token should have access to. Defaults to all
-      repositories that the installation can access. See
-      https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#create-an-installation-access-token-for-an-app's
-      `repositories`.
-  permissions:
-    description: >-
-      JSON-stringified permissions granted to the app token. Defaults to all the
-      GitHub app permissions, see:
-      https://docs.github.com/en/rest/apps/apps#create-an-installation-access-token-for-an-app
-  github-api-url:
-    description: >-
-      Configure github API URL. Default `https://api.github.com`
-    default: ${{ github.api_url }}
-  github-graphql-url:
-    description: >-
-      Configure github GraphQL URL. Default `https://api.github.com/graphql`
-    default: ${{ github.graphql_url }}
-  repository:
-    description: >-
-      The full name of the repository to operate on in owner/repo format.
-      Defaults to the current repository.
-    default: ${{ github.repository }}
   target-branch:
     description: >-
       Branch to open pull release PR against. Defaults to the repository's
@@ -142,38 +105,70 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: prepare
+    - name: preflight
       shell: bash
-      id: prepare
+      id: preflight
       run: |
+        echo "❯ Determining if action should run..."
         if [[ -n "$TARGET_BRANCH_PATTERN" ]]; then
+          echo "❯ Evaluating target branch pattern:"
+          echo "❯   - pattern:  $TARGET_BRANCH_PATTERN"
+          echo "❯   - ref name: $GITHUB_REF_NAME"
           if [[ "$GITHUB_REF_NAME" =~ $TARGET_BRANCH_PATTERN ]]; then
+            echo "✔ Target branch pattern matches ref name"
             RUN="true"
-            TARGET="$GITHUB_REF_NAME"
+            TARGET_BRANCH="$GITHUB_REF_NAME"
+          else
+            echo "✘ Target branch pattern does not match ref name"
           fi
         else
           RUN="true"
         fi
 
-        echo "target_branch=${TARGET:-$TARGET_BRANCH}" >> "$GITHUB_OUTPUT"
+        if [[ -z "$RUN" ]]; then
+          echo "✘ Not on a target branch, skipping run."
+        fi
+
+        echo "target-branch=${TARGET_BRANCH}" >> "$GITHUB_OUTPUT"
         echo "run=${RUN:-false}" >> "$GITHUB_OUTPUT"
       env:
         TARGET_BRANCH: "${{ inputs.target-branch }}"
         TARGET_BRANCH_PATTERN: "${{ inputs.target-branch-pattern }}"
-    - uses: tibdex/github-app-token@v2
-      if: steps.prepare.outputs.run == 'true' && inputs.app-id != null && inputs.app-id != ''
+    - name: resolve private key
+      if: >-
+        steps.preflight.outputs.run == 'true' &&
+        inputs.app-id != null &&
+        inputs.app-id != ''
+      id: resolve-private-key
+      shell: bash
+      run: |
+        echo "❯ Detecting private key format..."
+        if [[ "$INPUT_PRIVATE_KEY" =~ ^-----BEGIN ]]; then
+          echo "✔ PEM format detected"
+          private_key="$INPUT_PRIVATE_KEY"
+        else
+          echo "✔ Base64 format detected, decoding..."
+          private_key="$(echo "$INPUT_PRIVATE_KEY" | base64 -d)" &> /dev/null
+        fi
+
+        echo "❯ Formatting private key for output..."
+        private_key="$(echo "$private_key" | awk 'BEGIN {ORS="\\n"} {print}' | head -c -2)" &> /dev/null
+        echo "::add-mask::$private_key"
+        echo "private-key=$private_key" >> "$GITHUB_OUTPUT"
+        echo "✔ Private key format detected and securely passed to create-github-app-token action..."
+      env:
+        INPUT_PRIVATE_KEY: "${{ inputs.private-key }}"
+    - uses: actions/create-github-app-token@v2
+      if: >-
+        steps.preflight.outputs.run == 'true' &&
+        inputs.app-id != null &&
+        inputs.app-id != ''
       id: github-app-token
       with:
-        app_id: ${{ inputs.app-id }}
-        github_api_url: ${{ inputs.github-api-url }}
-        installation_retrieval_mode: ${{ inputs.installation-retrieval-mode }}
-        installation_retrieval_payload: ${{ inputs.installation-retrieval-payload }}
-        permissions: ${{ inputs.permissions }}
-        private_key: ${{ inputs.private-key }}
-        repositories: ${{ inputs.repositories }}
-        revoke: true
+        app-id: ${{ inputs.app-id }}
+        private-key: ${{ steps.resolve-private-key.outputs.private-key }}
     - name: resolve token
-      if: steps.prepare.outputs.run == 'true'
+      if: steps.preflight.outputs.run == 'true'
       id: token
       shell: bash
       run: |-
@@ -182,13 +177,10 @@ runs:
         APP_TOKEN: "${{ steps.github-app-token.outputs.token }}"
         INPUT_TOKEN: "${{ inputs.token }}"
     - uses: googleapis/release-please-action@v4
-      if: steps.prepare.outputs.run == 'true'
+      if: steps.preflight.outputs.run == 'true'
       id: release-please
       with:
         token: ${{ steps.token.outputs.token }}
-        target-branch: ${{ steps.prepare.outputs.target_branch }}
+        target-branch: ${{ steps.preflight.outputs.target-branch }}
         config-file: ${{ inputs.config-file }}
         manifest-file: ${{ inputs.manifest-file }}
-        github-api-url: ${{ inputs.github-api-url }}
-        github-graphql-url: ${{ inputs.github-graphql-url }}
-        repo-url: ${{ inputs.repository }}
