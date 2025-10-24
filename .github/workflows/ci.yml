@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: krystal/release-please-manifest-action@092261975f7de95f39420852ffa44410d8e726bc # v2.0.0
+      - uses: krystal/release-please-manifest-action@9e83450383c02fad51005c8248d04353da5be3ee # v3.0.0
         id: release
         with:
           app-id: ${{ vars.RELEASE_PLEASE_GITHUB_APP_ID }}
