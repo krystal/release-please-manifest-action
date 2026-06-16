@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.0.0](https://github.com/krystal/release-please-manifest-action/compare/v3.0.0...v4.0.0) (2026-06-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** the wrapped `actions/create-github-app-token` and `googleapis/release-please-action` dependencies are upgraded to new major versions that run on Node 24 and require compatible GitHub Actions runners. The GitHub App identifier input is now `client-id`; `app-id` remains accepted for compatibility but is deprecated.
+
+### Miscellaneous Chores
+
+* **deps:** update action dependency tooling ([#10](https://github.com/krystal/release-please-manifest-action/issues/10)) ([00ae20e](https://github.com/krystal/release-please-manifest-action/commit/00ae20ead6e275ebfe64e250513123bb6187d582))
+
 ## [3.0.0](https://github.com/krystal/release-please-manifest-action/compare/v2.0.0...v3.0.0) (2025-10-24)
 
 
