@@ -2,21 +2,39 @@
 name: Release
 on: push
 
+permissions: {}
+
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
+      - run: mise run lint
+
   docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
-          node-version: 20
-      - run: make docs
+          persist-credentials: false
+      - uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
+      - run: mise run docs
       - name: Verify no changes after docs build
-        run: |
-          git diff --exit-code
+        run: git diff --exit-code
 
   release-please:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: krystal/release-please-manifest-action@9e83450383c02fad51005c8248d04353da5be3ee # v3.0.0
@@ -26,7 +44,7 @@ jobs:
           private-key: ${{ secrets.RELEASE_PLEASE_GITHUB_APP_PRIVATE_KEY }}
       - name: MAJOR and MAJOR.MINOR tags
         if: ${{ steps.release.outputs.release_created }}
-        uses: jimeh/update-tags-action@e58fa0f2f874a12bf0eb90ef8ab4256808c0f373 # v1.0.1
+        uses: jimeh/update-tags-action@98d6d448de7488acb52bd8db115673541d019521 # v2.3.0
         with:
           tags: |
             v${{ steps.release.outputs.major }}

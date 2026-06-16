@@ -8,14 +8,19 @@ inputs:
   token:
     description: "GitHub token used to authenticate."
     default: ${{ github.token }}
-  app-id:
+  client-id:
     description: >-
-      ID of the GitHub App to use for authentication. If set, takes precedence
-      over token input.
+      Client ID of the GitHub App to use for authentication. If set, takes
+      precedence over app-id and token inputs.
+  app-id:
+    deprecationMessage: "Use 'client-id' instead of 'app-id'."
+    description: >-
+      ID of the GitHub App to use for authentication. Deprecated in favor of
+      client-id. Used only when client-id is not set.
   private-key:
     description: >-
       Private key of the GitHub App (can be Base64 encoded). Required when
-      app-id is provided.
+      client-id or app-id is provided.
   target-branch:
     description: >-
       Branch to open pull release PR against. Defaults to the repository's
@@ -24,8 +29,8 @@ inputs:
   target-branch-pattern:
     description: >-
       Regular expression pattern to determine if current ref name is a target
-      branch or not. When specified, the action will only run if the current
-      ref name matches the pattern, and the current ref name will be used as the
+      branch or not. When specified, the action will only run if the current ref
+      name matches the pattern, and the current ref name will be used as the
       target branch. When not specified, the action will always run, and target
       the specified target-branch, or the repository's default branch if
       target-branch is not specified.
@@ -136,9 +141,10 @@ runs:
         TARGET_BRANCH_PATTERN: "${{ inputs.target-branch-pattern }}"
     - name: resolve private key
       if: >-
-        steps.preflight.outputs.run == 'true' &&
-        inputs.app-id != null &&
-        inputs.app-id != ''
+        steps.preflight.outputs.run == 'true' && (
+          (inputs.client-id != null && inputs.client-id != '') ||
+          (inputs.app-id != null && inputs.app-id != '')
+        )
       id: resolve-private-key
       shell: bash
       run: |
@@ -158,15 +164,20 @@ runs:
         echo "✔ Private key format detected and securely passed to create-github-app-token action..."
       env:
         INPUT_PRIVATE_KEY: "${{ inputs.private-key }}"
-    - uses: actions/create-github-app-token@v2
+    - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
       if: >-
-        steps.preflight.outputs.run == 'true' &&
-        inputs.app-id != null &&
-        inputs.app-id != ''
+        steps.preflight.outputs.run == 'true' && (
+          (inputs.client-id != null && inputs.client-id != '') ||
+          (inputs.app-id != null && inputs.app-id != '')
+        )
       id: github-app-token
       with:
+        client-id: ${{ inputs.client-id }}
         app-id: ${{ inputs.app-id }}
         private-key: ${{ steps.resolve-private-key.outputs.private-key }}
+        permission-contents: write
+        permission-issues: write
+        permission-pull-requests: write
     - name: resolve token
       if: steps.preflight.outputs.run == 'true'
       id: token
@@ -176,7 +187,7 @@ runs:
       env:
         APP_TOKEN: "${{ steps.github-app-token.outputs.token }}"
         INPUT_TOKEN: "${{ inputs.token }}"
-    - uses: googleapis/release-please-action@v4
+    - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
       if: steps.preflight.outputs.run == 'true'
       id: release-please
       with:

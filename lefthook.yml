@@ -1,0 +1,11 @@
+pre-commit:
+  commands:
+    actionlint:
+      glob: ".github/workflows/*.{yml,yaml}"
+      run: mise exec -- actionlint {staged_files}
+    pinact:
+      glob: "{.github/workflows/*.{yml,yaml},action.{yml,yaml}}"
+      run: mise exec -- pinact run --fix=false --verify-comment {staged_files}
+    zizmor:
+      glob: "{.github/workflows/*.{yml,yaml},action.{yml,yaml}}"
+      run: mise exec -- zizmor --offline {staged_files}

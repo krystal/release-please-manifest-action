@@ -85,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         id: release-please
         with:
           config-file: .github/release-please-config.json
@@ -132,7 +132,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         id: release-please
         with:
           token: ${{ secrets.RELEASE_PAT_TOKEN }}
@@ -158,7 +158,7 @@ or a user's personal access token:
 - Compared to creating a separate "bot" user, paid organizations do not need to
   pay for an extra user seat when using an app.
 
-Below we assume you have already setup `RELEASE_BOT_APP_ID` and
+Below we assume you have already setup `RELEASE_BOT_CLIENT_ID` and
 `RELEASE_BOT_PRIVATE_KEY` secrets in the repository or organization.
 
 To set the private key secret, simply copy/paste the contents of the `*.pem`
@@ -175,7 +175,7 @@ jobs:
     steps:
       - uses: krystal/release-please-manifest-action@v3
         with:
-          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          client-id: ${{ secrets.RELEASE_BOT_CLIENT_ID }}
           private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
 ```
 
@@ -191,12 +191,12 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/create-github-app-token@v2
+      - uses: actions/create-github-app-token@v3
         id: github-app-token
         with:
-          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          client-id: ${{ secrets.RELEASE_BOT_CLIENT_ID }}
           private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         id: release-please
         with:
           token: ${{ steps.github-app-token.outputs.token }}
@@ -243,8 +243,9 @@ when cherry picking.
 | parameter             | description                                                                                                                                                                                                                                                                                                                                                                                            | required | default                               |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------------------------- |
 | token                 | GitHub token used to authenticate.                                                                                                                                                                                                                                                                                                                                                                     | `false`  | ${{ github.token }}                   |
-| app-id                | ID of the GitHub App to use for authentication. If set, takes precedence over token input.                                                                                                                                                                                                                                                                                                             | `false`  |                                       |
-| private-key           | Private key of the GitHub App (can be Base64 encoded). Required when app-id is provided.                                                                                                                                                                                                                                                                                                               | `false`  |                                       |
+| client-id             | Client ID of the GitHub App to use for authentication. If set, takes precedence over app-id and token inputs.                                                                                                                                                                                                                                                                                          | `false`  |                                       |
+| app-id                | ID of the GitHub App to use for authentication. Deprecated in favor of client-id. Used only when client-id is not set. Deprecated: Use 'client-id' instead of 'app-id'.                                                                                                                                                                                                                                | `false`  |                                       |
+| private-key           | Private key of the GitHub App (can be Base64 encoded). Required when client-id or app-id is provided.                                                                                                                                                                                                                                                                                                  | `false`  |                                       |
 | target-branch         | Branch to open pull release PR against. Defaults to the repository's default branch.                                                                                                                                                                                                                                                                                                                   | `false`  |                                       |
 | target-branch-pattern | Regular expression pattern to determine if current ref name is a target branch or not. When specified, the action will only run if the current ref name matches the pattern, and the current ref name will be used as the target branch. When not specified, the action will always run, and target the specified target-branch, or the repository's default branch if target-branch is not specified. | `false`  |                                       |
 | config-file           | Path to config file within the project.                                                                                                                                                                                                                                                                                                                                                                | `false`  | .github/release-please-config.json    |
