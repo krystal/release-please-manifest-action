@@ -1,0 +1,52 @@
+[settings]
+minimum_release_age = "3d"
+npm.package_manager = "bun"
+
+[settings.age]
+strict = true
+
+[tools]
+actionlint = "1.7.12"
+bun = "1.3.14"
+lefthook = "2.1.9"
+pinact = "4.1.0"
+zizmor = "1.25.2"
+"npm:action-docs" = "2.5.1"
+"npm:prettier" = "3.8.4"
+
+[tasks.setup]
+description = "Install tools and Git hooks"
+run = ["mise install", "lefthook install"]
+
+[tasks.action-docs]
+description = "Update generated action reference in README.md"
+run = "action-docs --update-readme"
+
+[tasks.readme]
+description = "Regenerate and format README.md"
+depends = ["action-docs"]
+run = "prettier --print-width 80 --prose-wrap always --write README.md"
+
+[tasks.docs]
+description = "Regenerate project documentation"
+depends = ["readme"]
+
+[tasks.hooks]
+description = "Install Git hooks"
+run = "lefthook install"
+
+[tasks.lint]
+description = "Run all lint checks"
+depends = ["actionlint", "pinact", "zizmor"]
+
+[tasks.actionlint]
+description = "Lint GitHub Actions workflows"
+run = "actionlint"
+
+[tasks.pinact]
+description = "Check GitHub Actions references are pinned"
+run = "pinact run --fix=false --verify-comment"
+
+[tasks.zizmor]
+description = "Run GitHub Actions security analysis"
+run = "zizmor --offline ."
